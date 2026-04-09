@@ -1,14 +1,15 @@
 from flask import Flask, request, redirect, session, render_template_string
-import sqlite3
 from datetime import datetime
 import os
 import random
 import calendar
+import psycopg
+from psycopg.rows import dict_row
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "nuvibank_level2_secret")
 
-DB = os.environ.get("DB_NAME", "nuvibank.db")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 
 EXPENSE_CATEGORIES = ["Comida", "Transporte", "Casa", "Lazer", "Outros"]
@@ -16,93 +17,68 @@ INCOME_CATEGORIES = ["Salário", "Negócio", "Presente", "Extra", "Outros"]
 
 
 def get_db():
-    conn = sqlite3.connect(DB)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
-def column_exists(conn, table_name, column_name):
-    cur = conn.cursor()
-    cur.execute(f"PRAGMA table_info({table_name})")
-    cols = cur.fetchall()
-    return any(col["name"] == column_name for col in cols)
+    if not DATABASE_URL:
+        raise RuntimeError("DATABASE_URL não configurada.")
+    return psycopg.connect(DATABASE_URL, row_factory=dict_row)
 
 
 def init_db():
-    conn = get_db()
-    cur = conn.cursor()
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    username TEXT UNIQUE NOT NULL,
+                    password TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    balance DOUBLE PRECISION NOT NULL DEFAULT 0,
+                    goal DOUBLE PRECISION NOT NULL DEFAULT 0,
+                    created_at TEXT,
+                    ref_source TEXT,
+                    email TEXT UNIQUE
+                )
+            """)
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        name TEXT NOT NULL,
-        balance REAL NOT NULL DEFAULT 0,
-        goal REAL NOT NULL DEFAULT 0,
-        created_at TEXT,
-        ref_source TEXT
-    )
-    """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS transactions (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    tx_type TEXT NOT NULL DEFAULT 'saida',
+                    amount DOUBLE PRECISION NOT NULL,
+                    category TEXT NOT NULL,
+                    note TEXT,
+                    created_at TEXT NOT NULL,
+                    ref TEXT NOT NULL
+                )
+            """)
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS transactions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        tx_type TEXT NOT NULL DEFAULT 'saida',
-        amount REAL NOT NULL,
-        category TEXT NOT NULL,
-        note TEXT,
-        created_at TEXT NOT NULL,
-        ref TEXT NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-    """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS feedback (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    rating INTEGER NOT NULL,
+                    message TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                )
+            """)
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS feedback (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        rating INTEGER NOT NULL,
-        message TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-    """)
+            cur.execute("SELECT id FROM users WHERE username = %s", ("founder",))
+            founder = cur.fetchone()
 
-    conn.commit()
-
-    if not column_exists(conn, "users", "created_at"):
-        cur.execute("ALTER TABLE users ADD COLUMN created_at TEXT")
-        conn.commit()
-
-    if not column_exists(conn, "users", "ref_source"):
-        cur.execute("ALTER TABLE users ADD COLUMN ref_source TEXT")
-        conn.commit()
-
-    if not column_exists(conn, "transactions", "tx_type"):
-        cur.execute("ALTER TABLE transactions ADD COLUMN tx_type TEXT NOT NULL DEFAULT 'saida'")
-        conn.commit()
-
-    cur.execute("SELECT id FROM users WHERE username = ?", ("founder",))
-    founder = cur.fetchone()
-
-    if not founder:
-        cur.execute("""
-        INSERT INTO users (username, password, name, balance, goal, created_at, ref_source)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (
-            "founder",
-            "1234",
-            "Roque Ntchiendo",
-            1250000.0,
-            200000.0,
-            datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "system"
-        ))
-        conn.commit()
-
-    conn.close()
+            if not founder:
+                cur.execute("""
+                    INSERT INTO users (username, password, name, balance, goal, created_at, ref_source, email)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    "founder",
+                    "1234",
+                    "Roque Ntchiendo",
+                    1250000.0,
+                    200000.0,
+                    datetime.now().strftime("%Y-%m-%d %H:%M"),
+                    "system",
+                    "founder@nuvibank.local"
+                ))
 
 
 def generate_ref():
@@ -110,127 +86,128 @@ def generate_ref():
 
 
 def get_user_by_id(user_id):
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM users WHERE id = ?", (user_id,))
-    user = cur.fetchone()
-    conn.close()
-    return user
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+            return cur.fetchone()
 
 
 def get_user_by_username(username):
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM users WHERE username = ?", (username,))
-    user = cur.fetchone()
-    conn.close()
-    return user
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM users WHERE username = %s", (username,))
+            return cur.fetchone()
 
 
-def create_user(name, username, password, balance=0.0, ref_source="direct"):
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("""
-    INSERT INTO users (name, username, password, balance, goal, created_at, ref_source)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (
-        name,
-        username,
-        password,
-        balance,
-        0.0,
-        datetime.now().strftime("%Y-%m-%d %H:%M"),
-        ref_source
-    ))
-    conn.commit()
-    conn.close()
+def get_user_by_email(email):
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+            return cur.fetchone()
+
+
+def create_user(name, username, password, balance=0.0, ref_source="direct", email=None):
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO users (name, username, password, balance, goal, created_at, ref_source, email)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                name,
+                username,
+                password,
+                balance,
+                0.0,
+                datetime.now().strftime("%Y-%m-%d %H:%M"),
+                ref_source,
+                email
+            ))
 
 
 def get_transactions(user_id):
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("""
-    SELECT * FROM transactions
-    WHERE user_id = ?
-    ORDER BY id DESC
-    """, (user_id,))
-    rows = cur.fetchall()
-    conn.close()
-    return rows
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT * FROM transactions
+                WHERE user_id = %s
+                ORDER BY id DESC
+            """, (user_id,))
+            return cur.fetchall()
 
 
 def add_transaction(user_id, tx_type, amount, category, note):
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("""
-    INSERT INTO transactions (user_id, tx_type, amount, category, note, created_at, ref)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (
-        user_id,
-        tx_type,
-        amount,
-        category,
-        note,
-        datetime.now().strftime("%Y-%m-%d %H:%M"),
-        generate_ref()
-    ))
-    conn.commit()
-    conn.close()
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO transactions (user_id, tx_type, amount, category, note, created_at, ref)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                user_id,
+                tx_type,
+                amount,
+                category,
+                note,
+                datetime.now().strftime("%Y-%m-%d %H:%M"),
+                generate_ref()
+            ))
 
 
 def update_balance(user_id, new_balance):
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("UPDATE users SET balance = ? WHERE id = ?", (new_balance, user_id))
-    conn.commit()
-    conn.close()
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE users SET balance = %s WHERE id = %s", (new_balance, user_id))
 
 
 def update_goal(user_id, new_goal):
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("UPDATE users SET goal = ? WHERE id = ?", (new_goal, user_id))
-    conn.commit()
-    conn.close()
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE users SET goal = %s WHERE id = %s", (new_goal, user_id))
 
 
 def save_feedback(user_id, rating, message):
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("""
-    INSERT INTO feedback (user_id, rating, message, created_at)
-    VALUES (?, ?, ?, ?)
-    """, (
-        user_id,
-        rating,
-        message,
-        datetime.now().strftime("%Y-%m-%d %H:%M")
-    ))
-    conn.commit()
-    conn.close()
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO feedback (user_id, rating, message, created_at)
+                VALUES (%s, %s, %s, %s)
+            """, (
+                user_id,
+                rating,
+                message,
+                datetime.now().strftime("%Y-%m-%d %H:%M")
+            ))
+
+
+def get_user_feedback(user_id):
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT rating, message, created_at
+                FROM feedback
+                WHERE user_id = %s
+                ORDER BY id DESC
+            """, (user_id,))
+            return cur.fetchall()
 
 
 def get_feedback_summary():
-    conn = get_db()
-    cur = conn.cursor()
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) AS total_feedback FROM feedback")
+            total_feedback = cur.fetchone()["total_feedback"]
 
-    cur.execute("SELECT COUNT(*) AS total_feedback FROM feedback")
-    total_feedback = cur.fetchone()["total_feedback"]
+            cur.execute("SELECT AVG(rating) AS avg_rating FROM feedback")
+            avg_rating_row = cur.fetchone()
+            avg_rating = avg_rating_row["avg_rating"] if avg_rating_row["avg_rating"] is not None else 0
 
-    cur.execute("SELECT AVG(rating) AS avg_rating FROM feedback")
-    avg_rating_row = cur.fetchone()
-    avg_rating = avg_rating_row["avg_rating"] if avg_rating_row["avg_rating"] is not None else 0
-
-    cur.execute("""
-    SELECT f.*, u.username
-    FROM feedback f
-    LEFT JOIN users u ON f.user_id = u.id
-    ORDER BY f.id DESC
-    LIMIT 10
-    """)
-    recent_feedback = cur.fetchall()
-
-    conn.close()
+            cur.execute("""
+                SELECT f.*, u.username
+                FROM feedback f
+                LEFT JOIN users u ON f.user_id = u.id
+                ORDER BY f.id DESC
+                LIMIT 10
+            """)
+            recent_feedback = cur.fetchall()
 
     return {
         "total_feedback": total_feedback,
@@ -240,54 +217,51 @@ def get_feedback_summary():
 
 
 def get_admin_stats():
-    conn = get_db()
-    cur = conn.cursor()
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) AS total_users FROM users")
+            total_users = cur.fetchone()["total_users"]
 
-    cur.execute("SELECT COUNT(*) AS total_users FROM users")
-    total_users = cur.fetchone()["total_users"]
+            cur.execute("SELECT COUNT(*) AS total_transactions FROM transactions")
+            total_transactions = cur.fetchone()["total_transactions"]
 
-    cur.execute("SELECT COUNT(*) AS total_transactions FROM transactions")
-    total_transactions = cur.fetchone()["total_transactions"]
+            cur.execute("""
+                SELECT COALESCE(SUM(amount), 0) AS total_income
+                FROM transactions
+                WHERE tx_type = 'entrada'
+            """)
+            total_income = cur.fetchone()["total_income"]
 
-    cur.execute("""
-    SELECT COALESCE(SUM(amount), 0) AS total_income
-    FROM transactions
-    WHERE tx_type = 'entrada'
-    """)
-    total_income = cur.fetchone()["total_income"]
+            cur.execute("""
+                SELECT COALESCE(SUM(amount), 0) AS total_expense
+                FROM transactions
+                WHERE tx_type = 'saida'
+            """)
+            total_expense = cur.fetchone()["total_expense"]
 
-    cur.execute("""
-    SELECT COALESCE(SUM(amount), 0) AS total_expense
-    FROM transactions
-    WHERE tx_type = 'saida'
-    """)
-    total_expense = cur.fetchone()["total_expense"]
+            cur.execute("""
+                SELECT id, name, username, balance, created_at, ref_source, email
+                FROM users
+                ORDER BY id DESC
+                LIMIT 10
+            """)
+            recent_users = cur.fetchall()
 
-    cur.execute("""
-    SELECT id, name, username, balance, created_at, ref_source
-    FROM users
-    ORDER BY id DESC
-    LIMIT 10
-    """)
-    recent_users = cur.fetchall()
+            cur.execute("""
+                SELECT id, tx_type, amount, category, note, created_at, ref, user_id
+                FROM transactions
+                ORDER BY id DESC
+                LIMIT 15
+            """)
+            recent_transactions = cur.fetchall()
 
-    cur.execute("""
-    SELECT id, tx_type, amount, category, note, created_at, ref, user_id
-    FROM transactions
-    ORDER BY id DESC
-    LIMIT 15
-    """)
-    recent_transactions = cur.fetchall()
-
-    cur.execute("""
-    SELECT COALESCE(ref_source, 'direct') AS ref_source, COUNT(*) AS total
-    FROM users
-    GROUP BY COALESCE(ref_source, 'direct')
-    ORDER BY total DESC, ref_source ASC
-    """)
-    source_breakdown = cur.fetchall()
-
-    conn.close()
+            cur.execute("""
+                SELECT COALESCE(ref_source, 'direct') AS ref_source, COUNT(*) AS total
+                FROM users
+                GROUP BY COALESCE(ref_source, 'direct')
+                ORDER BY total DESC, ref_source ASC
+            """)
+            source_breakdown = cur.fetchall()
 
     feedback_summary = get_feedback_summary()
 
@@ -479,60 +453,22 @@ def get_alerts(category_totals, monthly_income, monthly_expense, projected_expen
     return alerts
 
 
-def get_categories_for_type(tx_type):
-    return INCOME_CATEGORIES if tx_type == "entrada" else EXPENSE_CATEGORIES
-
-
 PAGE = """
 <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NUVIBANK Lite Nível 2</title>
+    <title>NUVIBANK Lite</title>
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #0b1220;
-            color: #ffffff;
-        }
-        .wrap {
-            max-width: 860px;
-            margin: 0 auto;
-            padding: 16px;
-        }
-        .card {
-            background: #111a2b;
-            border: 1px solid #22304a;
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-        .brand {
-            font-size: 24px;
-            font-weight: bold;
-            color: #7fb3ff;
-        }
-        .muted {
-            color: #b3bfd1;
-            font-size: 14px;
-        }
-        .balance {
-            font-size: 30px;
-            font-weight: bold;
-            margin: 8px 0;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-        @media (min-width: 700px) {
-            .grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
+        body { margin: 0; font-family: Arial, sans-serif; background: #0b1220; color: #ffffff; }
+        .wrap { max-width: 860px; margin: 0 auto; padding: 16px; }
+        .card { background: #111a2b; border: 1px solid #22304a; border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+        .brand { font-size: 24px; font-weight: bold; color: #7fb3ff; }
+        .muted { color: #b3bfd1; font-size: 14px; }
+        .balance { font-size: 30px; font-weight: bold; margin: 8px 0; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        @media (min-width: 700px) { .grid { grid-template-columns: 1fr 1fr; } }
         input, select, textarea, button {
             width: 100%;
             box-sizing: border-box;
@@ -542,62 +478,17 @@ PAGE = """
             border: none;
             font-size: 15px;
         }
-        textarea {
-            min-height: 110px;
-            resize: vertical;
-        }
-        button {
-            background: #2f80ed;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .error {
-            background: #4a1f28;
-            color: #ffb3b3;
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 12px;
-        }
-        .success {
-            background: #15351f;
-            color: #b8f5c8;
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 12px;
-        }
-        .small {
-            font-size: 13px;
-            color: #b3bfd1;
-        }
-        .logout {
-            color: #ffb0b0;
-            text-decoration: none;
-        }
-        ul {
-            padding-left: 18px;
-        }
-        .progress-box {
-            background: #0b1220;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-top: 10px;
-            border: 1px solid #22304a;
-        }
-        .progress-bar {
-            height: 14px;
-            background: #2f80ed;
-        }
-        .score {
-            font-size: 26px;
-            font-weight: bold;
-            color: #7fffb0;
-        }
-        a.action-link {
-            color: #7fb3ff;
-            text-decoration: none;
-            font-weight: bold;
-        }
+        textarea { min-height: 110px; resize: vertical; }
+        button { background: #2f80ed; color: white; font-weight: bold; cursor: pointer; }
+        .error { background: #4a1f28; color: #ffb3b3; padding: 10px; border-radius: 10px; margin-top: 12px; }
+        .success { background: #15351f; color: #b8f5c8; padding: 10px; border-radius: 10px; margin-top: 12px; }
+        .small { font-size: 13px; color: #b3bfd1; }
+        .logout { color: #ffb0b0; text-decoration: none; }
+        ul { padding-left: 18px; }
+        .progress-box { background: #0b1220; border-radius: 12px; overflow: hidden; margin-top: 10px; border: 1px solid #22304a; }
+        .progress-bar { height: 14px; background: #2f80ed; }
+        .score { font-size: 26px; font-weight: bold; color: #7fffb0; }
+        a.action-link { color: #7fb3ff; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -608,13 +499,11 @@ PAGE = """
             <p class="muted">Controlo financeiro pessoal inteligente.</p>
             <h2>Entrar</h2>
             <form method="post" action="/login">
-                <input name="username" placeholder="Utilizador" required>
+                <input name="login_id" placeholder="Utilizador ou email" required>
                 <input name="password" type="password" placeholder="Senha" required>
                 <button type="submit">Entrar</button>
             </form>
-            {% if error %}
-                <div class="error">{{ error }}</div>
-            {% endif %}
+            {% if error %}<div class="error">{{ error }}</div>{% endif %}
         </div>
 
         <div class="card">
@@ -623,17 +512,14 @@ PAGE = """
                 <input type="hidden" name="ref_source" value="{{ ref_source }}">
                 <input name="name" placeholder="Nome completo" required>
                 <input name="username" placeholder="Novo utilizador" required>
+                <input name="email" type="email" placeholder="Email" required>
                 <input name="password" type="password" placeholder="Nova senha" required>
                 <input name="balance" placeholder="Saldo inicial (opcional)">
                 <button type="submit">Criar conta</button>
             </form>
             <div class="small">Origem atual: {{ ref_source }}</div>
-            {% if register_error %}
-                <div class="error">{{ register_error }}</div>
-            {% endif %}
-            {% if register_message %}
-                <div class="success">{{ register_message }}</div>
-            {% endif %}
+            {% if register_error %}<div class="error">{{ register_error }}</div>{% endif %}
+            {% if register_message %}<div class="success">{{ register_message }}</div>{% endif %}
         </div>
     {% endif %}
 
@@ -641,11 +527,12 @@ PAGE = """
         <div class="card">
             <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
                 <div>
-                    <div class="brand">NUVIBANK Lite Nível 2</div>
+                    <div class="brand">NUVIBANK Lite</div>
                     <div class="muted">Sistema simples de controlo financeiro</div>
                 </div>
                 <div class="small">
                     {{ name }}<br>
+                    {{ email }}<br>
                     <a class="logout" href="/logout">Terminar sessão</a>
                 </div>
             </div>
@@ -703,12 +590,8 @@ PAGE = """
                 <input name="note" placeholder="Nota opcional">
                 <button type="submit">Guardar Movimento</button>
             </form>
-            {% if error %}
-                <div class="error">{{ error }}</div>
-            {% endif %}
-            {% if message %}
-                <div class="success">{{ message }}</div>
-            {% endif %}
+            {% if error %}<div class="error">{{ error }}</div>{% endif %}
+            {% if message %}<div class="success">{{ message }}</div>{% endif %}
         </div>
 
         <div class="card">
@@ -748,9 +631,7 @@ PAGE = """
                             {{ tx["category"] }} |
                             {{ tx["amount"] }} Kz |
                             {{ tx["ref"] }}
-                            {% if tx["note"] %}
-                                | {{ tx["note"] }}
-                            {% endif %}
+                            {% if tx["note"] %}| {{ tx["note"] }}{% endif %}
                         </li>
                     {% endfor %}
                 </ul>
@@ -763,6 +644,17 @@ PAGE = """
             <h3>Feedback</h3>
             <p class="small">Ajuda-nos a melhorar o produto.</p>
             <a class="action-link" href="/feedback">💬 Dar feedback</a>
+
+            <h4>Meus Feedbacks</h4>
+            {% if user_feedback %}
+                <ul>
+                    {% for f in user_feedback %}
+                        <li>{{ f["created_at"] }} | {{ f["rating"] }}/5 | {{ f["message"] }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="muted">Ainda não enviaste feedback.</p>
+            {% endif %}
         </div>
     {% endif %}
 
@@ -770,7 +662,6 @@ PAGE = """
         <div class="card">
             <div class="brand">Feedback</div>
             <p class="muted">Conta-nos o que achaste da app.</p>
-
             <form method="post" action="/feedback">
                 <select name="rating" required>
                     <option value="">Seleciona uma avaliação</option>
@@ -780,18 +671,11 @@ PAGE = """
                     <option value="4">4 - Bom</option>
                     <option value="5">5 - Excelente</option>
                 </select>
-
                 <textarea name="message" placeholder="Escreve o teu feedback..." required></textarea>
                 <button type="submit">Enviar Feedback</button>
             </form>
-
-            {% if error %}
-                <div class="error">{{ error }}</div>
-            {% endif %}
-            {% if message %}
-                <div class="success">{{ message }}</div>
-            {% endif %}
-
+            {% if error %}<div class="error">{{ error }}</div>{% endif %}
+            {% if message %}<div class="success">{{ message }}</div>{% endif %}
             <p class="small"><a class="action-link" href="/dashboard">← Voltar ao dashboard</a></p>
         </div>
     {% endif %}
@@ -809,77 +693,19 @@ ADMIN_PAGE = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NUVIBANK Admin</title>
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #0b1220;
-            color: #ffffff;
-        }
-        .wrap {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 16px;
-        }
-        .card {
-            background: #111a2b;
-            border: 1px solid #22304a;
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-        .brand {
-            font-size: 24px;
-            font-weight: bold;
-            color: #7fb3ff;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-        @media (min-width: 700px) {
-            .grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        input, button {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 12px;
-            margin-top: 10px;
-            border-radius: 10px;
-            border: none;
-            font-size: 15px;
-        }
-        button {
-            background: #2f80ed;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .metric {
-            font-size: 28px;
-            font-weight: bold;
-            margin-top: 8px;
-        }
-        .small {
-            color: #b3bfd1;
-            font-size: 13px;
-        }
-        .error {
-            background: #4a1f28;
-            color: #ffb3b3;
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 12px;
-        }
-        .logout {
-            color: #ffb0b0;
-            text-decoration: none;
-        }
-        ul {
-            padding-left: 18px;
-        }
+        body { margin: 0; font-family: Arial, sans-serif; background: #0b1220; color: #ffffff; }
+        .wrap { max-width: 960px; margin: 0 auto; padding: 16px; }
+        .card { background: #111a2b; border: 1px solid #22304a; border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+        .brand { font-size: 24px; font-weight: bold; color: #7fb3ff; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        @media (min-width: 700px) { .grid { grid-template-columns: 1fr 1fr; } }
+        input, button { width: 100%; box-sizing: border-box; padding: 12px; margin-top: 10px; border-radius: 10px; border: none; font-size: 15px; }
+        button { background: #2f80ed; color: white; font-weight: bold; cursor: pointer; }
+        .metric { font-size: 28px; font-weight: bold; margin-top: 8px; }
+        .small { color: #b3bfd1; font-size: 13px; }
+        .error { background: #4a1f28; color: #ffb3b3; padding: 10px; border-radius: 10px; margin-top: 12px; }
+        .logout { color: #ffb0b0; text-decoration: none; }
+        ul { padding-left: 18px; }
     </style>
 </head>
 <body>
@@ -892,9 +718,7 @@ ADMIN_PAGE = """
                 <input name="password" type="password" placeholder="Senha admin" required>
                 <button type="submit">Entrar no Admin</button>
             </form>
-            {% if error %}
-                <div class="error">{{ error }}</div>
-            {% endif %}
+            {% if error %}<div class="error">{{ error }}</div>{% endif %}
         </div>
     {% endif %}
 
@@ -905,9 +729,7 @@ ADMIN_PAGE = """
                     <div class="brand">NUVIBANK Admin Dashboard</div>
                     <div class="small">Painel interno de validação e crescimento</div>
                 </div>
-                <div class="small">
-                    <a class="logout" href="/admin-logout">Sair do Admin</a>
-                </div>
+                <div class="small"><a class="logout" href="/admin-logout">Sair do Admin</a></div>
             </div>
         </div>
 
@@ -916,7 +738,6 @@ ADMIN_PAGE = """
                 <h3>Total de Utilizadores</h3>
                 <div class="metric">{{ total_users }}</div>
             </div>
-
             <div class="card">
                 <h3>Total de Movimentos</h3>
                 <div class="metric">{{ total_transactions }}</div>
@@ -928,7 +749,6 @@ ADMIN_PAGE = """
                 <h3>Total de Entradas</h3>
                 <div class="metric">{{ total_income }} Kz</div>
             </div>
-
             <div class="card">
                 <h3>Total de Saídas</h3>
                 <div class="metric">{{ total_expense }} Kz</div>
@@ -940,7 +760,6 @@ ADMIN_PAGE = """
                 <h3>Total de Feedbacks</h3>
                 <div class="metric">{{ total_feedback }}</div>
             </div>
-
             <div class="card">
                 <h3>Média de Rating</h3>
                 <div class="metric">{{ avg_rating }}/5</div>
@@ -965,7 +784,7 @@ ADMIN_PAGE = """
             {% if recent_users %}
                 <ul>
                     {% for u in recent_users %}
-                        <li>{{ u["created_at"] }} | {{ u["name"] }} | {{ u["username"] }} | {{ u["balance"] }} Kz | origem: {{ u["ref_source"] or "direct" }}</li>
+                        <li>{{ u["created_at"] }} | {{ u["name"] }} | {{ u["username"] }} | {{ u["email"] or "-" }} | {{ u["balance"] }} Kz | origem: {{ u["ref_source"] or "direct" }}</li>
                     {% endfor %}
                 </ul>
             {% else %}
@@ -1024,17 +843,11 @@ def render_login(error=None, register_error=None, register_message=None):
 
 
 def render_feedback(error=None, message=None):
-    return render_template_string(
-        PAGE,
-        page="feedback",
-        error=error,
-        message=message
-    )
+    return render_template_string(PAGE, page="feedback", error=error, message=message)
 
 
 def render_dashboard(user_row, error=None, message=None):
     transactions = get_transactions(user_row["id"])
-
     category_totals = get_category_totals(transactions)
     monthly_income = get_monthly_income(transactions)
     monthly_expense = get_monthly_expense(transactions)
@@ -1043,6 +856,7 @@ def render_dashboard(user_row, error=None, message=None):
     days_left = get_days_left_in_month()
     projected_final_balance = get_projected_final_balance(user_row["balance"], monthly_expense)
     autonomy_text = get_financial_autonomy(user_row["balance"], monthly_expense)
+    user_feedback = get_user_feedback(user_row["id"])
 
     alerts = get_alerts(
         category_totals,
@@ -1072,6 +886,7 @@ def render_dashboard(user_row, error=None, message=None):
         page="dashboard",
         name=user_row["name"],
         username=user_row["username"],
+        email=user_row.get("email") or "-",
         balance=f"{user_row['balance']:,.2f}",
         monthly_income=f"{monthly_income:,.2f}",
         monthly_expense=f"{monthly_expense:,.2f}",
@@ -1089,7 +904,8 @@ def render_dashboard(user_row, error=None, message=None):
         transactions=transactions,
         categories=EXPENSE_CATEGORIES,
         error=error,
-        message=message
+        message=message,
+        user_feedback=user_feedback
     )
 
 
@@ -1102,10 +918,13 @@ def home():
 
 @app.route("/login", methods=["POST"])
 def login():
-    username = request.form.get("username", "").strip()
+    login_id = request.form.get("login_id", "").strip()
     password = request.form.get("password", "").strip()
 
-    user_row = get_user_by_username(username)
+    user_row = get_user_by_username(login_id)
+    if not user_row:
+        user_row = get_user_by_email(login_id)
+
     if not user_row or user_row["password"] != password:
         return render_login(error="Credenciais inválidas.")
 
@@ -1117,15 +936,19 @@ def login():
 def register():
     name = request.form.get("name", "").strip()
     username = request.form.get("username", "").strip()
+    email = request.form.get("email", "").strip().lower()
     password = request.form.get("password", "").strip()
     balance_raw = request.form.get("balance", "").strip().replace(",", ".")
     form_ref = request.form.get("ref_source", "").strip()
 
-    if not name or not username or not password:
-        return render_login(register_error="Preenche nome, utilizador e senha.")
+    if not name or not username or not email or not password:
+        return render_login(register_error="Preenche nome, utilizador, email e senha.")
 
     if get_user_by_username(username):
         return render_login(register_error="Esse utilizador já existe.")
+
+    if get_user_by_email(email):
+        return render_login(register_error="Esse email já existe.")
 
     balance = 0.0
     if balance_raw:
@@ -1133,12 +956,11 @@ def register():
             balance = float(balance_raw)
         except ValueError:
             return render_login(register_error="Saldo inicial inválido.")
-
         if balance < 0:
             return render_login(register_error="O saldo inicial não pode ser negativo.")
 
     ref_source = form_ref or session.get("ref_source", "direct")
-    create_user(name, username, password, balance, ref_source)
+    create_user(name, username, password, balance, ref_source, email)
 
     return render_login(register_message="Conta criada com sucesso.")
 
@@ -1185,7 +1007,7 @@ def add():
     if amount <= 0:
         return render_dashboard(user_row, error="O valor deve ser maior que zero.")
 
-    valid_categories = get_categories_for_type(tx_type)
+    valid_categories = INCOME_CATEGORIES if tx_type == "entrada" else EXPENSE_CATEGORIES
     if category not in valid_categories:
         return render_dashboard(user_row, error="Categoria inválida para este tipo de movimento.")
 
@@ -1271,10 +1093,8 @@ def logout():
 def admin_login():
     if request.method == "POST":
         password = request.form.get("password", "").strip()
-
         if password != ADMIN_PASSWORD:
             return render_template_string(ADMIN_PAGE, page="admin_login", error="Senha admin inválida.")
-
         session["admin_ok"] = True
         return redirect("/admin")
 

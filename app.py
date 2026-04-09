@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "nuvibank_level2_secret")
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "NUVI_admin_2026!X9")
 
 EXPENSE_CATEGORIES = ["Comida", "Transporte", "Casa", "Lazer", "Outros"]
 INCOME_CATEGORIES = ["Salário", "Negócio", "Presente", "Extra", "Outros"]
@@ -211,7 +211,7 @@ def get_feedback_summary():
 
     return {
         "total_feedback": total_feedback,
-        "avg_rating": round(avg_rating, 2),
+        "avg_rating": round(float(avg_rating or 0), 2),
         "recent_feedback": recent_feedback
     }
 
@@ -243,7 +243,7 @@ def get_admin_stats():
                 SELECT id, name, username, balance, created_at, ref_source, email
                 FROM users
                 ORDER BY id DESC
-                LIMIT 10
+                LIMIT 20
             """)
             recent_users = cur.fetchall()
 
@@ -251,7 +251,7 @@ def get_admin_stats():
                 SELECT id, tx_type, amount, category, note, created_at, ref, user_id
                 FROM transactions
                 ORDER BY id DESC
-                LIMIT 15
+                LIMIT 20
             """)
             recent_transactions = cur.fetchall()
 
@@ -488,15 +488,15 @@ PAGE = """
         .progress-box { background: #0b1220; border-radius: 12px; overflow: hidden; margin-top: 10px; border: 1px solid #22304a; }
         .progress-bar { height: 14px; background: #2f80ed; }
         .score { font-size: 26px; font-weight: bold; color: #7fffb0; }
-        a.action-link { color: #7fb3ff; text-decoration: none; font-weight: bold; }
+        .section-link { color: #7fb3ff; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 <div class="wrap">
     {% if page == 'login' %}
         <div class="card">
-            <div class="brand">NUVIBANK Lite</div>
-            <p class="muted">Controlo financeiro pessoal inteligente.</p>
+            <div class="brand">NUVIBANK Lite Nível 2</div>
+            <p class="muted">Sistema simples de controlo financeiro</p>
             <h2>Entrar</h2>
             <form method="post" action="/login">
                 <input name="login_id" placeholder="Utilizador ou email" required>
@@ -525,52 +525,43 @@ PAGE = """
 
     {% if page == 'dashboard' %}
         <div class="card">
-            <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-                <div>
-                    <div class="brand">NUVIBANK Lite</div>
-                    <div class="muted">Sistema simples de controlo financeiro</div>
-                </div>
-                <div class="small">
-                    {{ name }}<br>
-                    {{ email }}<br>
-                    <a class="logout" href="/logout">Terminar sessão</a>
-                </div>
+            <div class="brand">NUVIBANK Lite Nível 2</div>
+            <div class="muted">Sistema simples de controlo financeiro</div>
+            <div style="margin-top:14px;">
+                {{ name }}<br>
+                <a class="logout" href="/logout">Terminar sessão</a>
             </div>
         </div>
 
-        <div class="grid">
-            <div class="card">
-                <h3>Saldo Atual</h3>
-                <div class="balance">{{ balance }} Kz</div>
-                <div class="small">Utilizador: {{ username }}</div>
-            </div>
-
-            <div class="card">
-                <h3>Score Financeiro</h3>
-                <div class="score">{{ score }}/100</div>
-                <div class="small">Status: <strong>{{ score_status }}</strong></div>
-                <div class="small">Baseado em saldo, entradas, saídas e meta.</div>
-            </div>
+        <div class="card">
+            <h3>Saldo Atual</h3>
+            <div class="balance">{{ balance }} Kz</div>
+            <div class="small">Utilizador: {{ username }}</div>
         </div>
 
-        <div class="grid">
-            <div class="card">
-                <h3>Resumo do Mês</h3>
-                <div><strong>Entradas:</strong> {{ monthly_income }} Kz</div>
-                <div><strong>Saídas:</strong> {{ monthly_expense }} Kz</div>
-                <div><strong>Projeção de gastos:</strong> {{ projected_expense }} Kz</div>
-                <div><strong>Saldo projetado no fim do mês:</strong> {{ projected_final_balance }} Kz</div>
-                <div><strong>Autonomia financeira:</strong> {{ autonomy_text }}</div>
-                <div><strong>Dias restantes:</strong> {{ days_left }}</div>
-            </div>
+        <div class="card">
+            <h3>Score Financeiro</h3>
+            <div class="score">{{ score }}/100</div>
+            <div class="small">Status: <strong>{{ score_status }}</strong></div>
+            <div class="small">Baseado em saldo, entradas, saídas e meta.</div>
+        </div>
 
-            <div class="card">
-                <h3>Meta Financeira</h3>
-                <div><strong>Meta:</strong> {{ goal }} Kz</div>
-                <div><strong>Progresso:</strong> {{ progress_percent }}%</div>
-                <div class="progress-box">
-                    <div class="progress-bar" style="width: {{ progress_bar_width }}%;"></div>
-                </div>
+        <div class="card">
+            <h3>Resumo do Mês</h3>
+            <div><strong>Entradas:</strong> {{ monthly_income }} Kz</div>
+            <div><strong>Saídas:</strong> {{ monthly_expense }} Kz</div>
+            <div><strong>Projeção de gastos:</strong> {{ projected_expense }} Kz</div>
+            <div><strong>Saldo projetado no fim do mês:</strong> {{ projected_final_balance }} Kz</div>
+            <div><strong>Autonomia financeira:</strong> {{ autonomy_text }}</div>
+            <div><strong>Dias restantes:</strong> {{ days_left }}</div>
+        </div>
+
+        <div class="card">
+            <h3>Meta Financeira</h3>
+            <div><strong>Meta:</strong> {{ goal }} Kz</div>
+            <div><strong>Progresso:</strong> {{ progress_percent }}%</div>
+            <div class="progress-box">
+                <div class="progress-bar" style="width: {{ progress_bar_width }}%;"></div>
             </div>
         </div>
 
@@ -581,12 +572,12 @@ PAGE = """
                     <option value="saida">Saída</option>
                     <option value="entrada">Entrada</option>
                 </select>
-                <input name="amount" placeholder="Valor em Kz" required>
                 <select name="category" required>
                     {% for c in categories %}
                         <option value="{{ c }}">{{ c }}</option>
                     {% endfor %}
                 </select>
+                <input name="amount" placeholder="Valor em Kz" required>
                 <input name="note" placeholder="Nota opcional">
                 <button type="submit">Guardar Movimento</button>
             </form>
@@ -643,9 +634,9 @@ PAGE = """
         <div class="card">
             <h3>Feedback</h3>
             <p class="small">Ajuda-nos a melhorar o produto.</p>
-            <a class="action-link" href="/feedback">💬 Dar feedback</a>
+            <a class="section-link" href="/feedback">💬 Dar feedback</a>
 
-            <h4>Meus Feedbacks</h4>
+            <h4 style="margin-top:20px;">Meus Feedbacks</h4>
             {% if user_feedback %}
                 <ul>
                     {% for f in user_feedback %}
@@ -676,7 +667,7 @@ PAGE = """
             </form>
             {% if error %}<div class="error">{{ error }}</div>{% endif %}
             {% if message %}<div class="success">{{ message }}</div>{% endif %}
-            <p class="small"><a class="action-link" href="/dashboard">← Voltar ao dashboard</a></p>
+            <p class="small"><a class="section-link" href="/dashboard">← Voltar ao dashboard</a></p>
         </div>
     {% endif %}
 </div>
@@ -810,7 +801,7 @@ ADMIN_PAGE = """
             {% if recent_feedback %}
                 <ul>
                     {% for f in recent_feedback %}
-                        <li>{{ f["created_at"] }} | {{ f["username"] }} | {{ f["rating"] }}/5 | {{ f["message"] }}</li>
+                        <li>{{ f["created_at"] }} | {{ f["username"] or "-" }} | {{ f["rating"] }}/5 | {{ f["message"] }}</li>
                     {% endfor %}
                 </ul>
             {% else %}
@@ -881,6 +872,8 @@ def render_dashboard(user_row, error=None, message=None):
 
     progress_bar_width = min(progress_percent, 100)
 
+    tx_categories = INCOME_CATEGORIES + EXPENSE_CATEGORIES
+
     return render_template_string(
         PAGE,
         page="dashboard",
@@ -902,7 +895,7 @@ def render_dashboard(user_row, error=None, message=None):
         category_totals={k: f"{v:,.2f}" for k, v in category_totals.items()},
         alerts=alerts,
         transactions=transactions,
-        categories=EXPENSE_CATEGORIES,
+        categories=tx_categories,
         error=error,
         message=message,
         user_feedback=user_feedback

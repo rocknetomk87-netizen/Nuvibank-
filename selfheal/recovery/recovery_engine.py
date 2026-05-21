@@ -1,15 +1,18 @@
 class RecoveryEngine:
 
-    def recover(
+    def recover(self, failures):
 
-        self,
+        recovered = []
 
-        service
-    ):
+        for system in failures:
 
-        return {
+            recovered.append({
 
-            "service": service,
+                "system": system,
 
-            "status": "RECOVERED"
-        }
+                "recovery": "RECOVERED",
+
+                "status": "SUCCESS"
+            })
+
+        return recovered

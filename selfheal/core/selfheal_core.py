@@ -2,55 +2,54 @@ from selfheal.recovery.recovery_engine import (
     RecoveryEngine
 )
 
+from selfheal.restart.restart_engine import (
+    RestartEngine
+)
+
 from selfheal.repair.repair_engine import (
     RepairEngine
 )
 
-from selfheal.restart.restart_engine import (
-    RestartEngine
+from selfheal.runtime.selfheal_runtime import (
+    SelfHealRuntime
 )
+
 
 class SelfHealCore:
 
     def __init__(self):
 
-        self.recovery = (
-            RecoveryEngine()
+        self.recovery = RecoveryEngine()
+
+        self.restart = RestartEngine()
+
+        self.repair = RepairEngine()
+
+        self.runtime = SelfHealRuntime()
+
+    def heal(self, failures):
+
+        recovery = self.recovery.recover(
+            failures
         )
 
-        self.repair = (
-            RepairEngine()
+        restart = self.restart.restart(
+            failures
         )
 
-        self.restart_engine = (
-            RestartEngine()
+        repair = self.repair.repair(
+            failures
         )
 
-    def heal(self):
-
-        recovery = (
-            self.recovery
-            .recover("PAYMENT_API")
-        )
-
-        repair = (
-            self.repair
-            .repair("NODE-2")
-        )
-
-        restart = (
-            self.restart_engine
-            .restart("WORKER-7")
-        )
+        runtime = self.runtime.status()
 
         return {
 
-            "recovery":
-            recovery,
+            "recovery": recovery,
 
-            "repair":
-            repair,
+            "restart": restart,
 
-            "restart":
-            restart
+            "repair": repair,
+
+            "runtime": runtime
         }

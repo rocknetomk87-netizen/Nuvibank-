@@ -1,143 +1,124 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-import sqlite3
-import jwt
-from datetime import datetime
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    jwt_required,
+    get_jwt_identity
+)
+
+import datetime
+import os
 
 app = Flask(__name__)
+
+# CONFIG
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'nuvibank.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# JWT SECRET PROFISSIONAL
+app.config['JWT_SECRET_KEY'] = 'NUVIBANK_ULTRA_SECRET_KEY_2026_SECURE_SYSTEM'
+
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
+
 CORS(app)
 
-SECRET_KEY = "NUVIBANK_ULTRA_SECRET"
-
-DATABASE = "nuvibank.db"
-
 
 # =========================
-# DATABASE
+# MODELOS
 # =========================
 
-def init_db():
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
 
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
+    username = db.Column(db.String(80), unique=True, nullable=False)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE,
-        password TEXT,
-        balance INTEGER DEFAULT 500000
-    )
-    """)
+    password = db.Column(db.String(200), nullable=False)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS history(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        sender TEXT,
-        receiver TEXT,
-        amount INTEGER,
-        created_at TEXT
-    )
-    """)
-
-    conn.commit()
-    conn.close()
+    balance = db.Column(db.Float, default=0)
 
 
-init_db()
+class Transaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
 
+    sender = db.Column(db.String(80))
 
-# =========================
-# HOME
-# =========================
+    recipient = db.Column(db.String(80))
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+    amount = db.Column(db.Float)
 
-
-# =========================
-# REGISTER
-# =========================
-
-@app.route("/register", methods=["POST"])
-def register():
-
-    data = request.json
-
-    username = data.get("username")
-    password = data.get("password")
-
-    if not username or not password:
-        return jsonify({
-            "error": "Preencha todos campos"
-        }), 400
-
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT * FROM users WHERE username=?",
-        (username,)
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.datetime.now(datetime.UTC)
     )
 
-    existing = cursor.fetchone()
 
-    if existing:
-        conn.close()
+# =========================
+# CRIAR BASE
+# =========================
 
-        return jsonify({
-            "error": "Utilizador já existe"
-        }), 400
+with app.app_context():
 
-    cursor.execute("""
-    INSERT INTO users(username, password)
-    VALUES (?, ?)
-    """, (username, password))
+    db.create_all()
 
-    conn.commit()
-    conn.close()
+    admin = User.query.filter_by(username='admin').first()
 
-    return jsonify({
-        "message": "Conta criada"
-    })
+    if not admin:
+
+        hashed = bcrypt.generate_password_hash(
+            'admin123'
+        ).decode('utf-8')
+
+        admin_user = User(
+            username='admin',
+            password=hashed,
+            balance=100000
+        )
+
+        db.session.add(admin_user)
+        db.session.commit()
+
+        print("✅ ADMIN CRIADO")
 
 
 # =========================
 # LOGIN
 # =========================
 
-@app.route("/login", methods=["POST"])
+@app.route('/login', methods=['POST'])
 def login():
 
     data = request.json
 
-    username = data.get("username")
-    password = data.get("password")
+    username = data.get('username')
+    password = data.get('password')
 
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-
-    cursor.execute("""
-    SELECT * FROM users
-    WHERE username=? AND password=?
-    """, (username, password))
-
-    user = cursor.fetchone()
-
-    conn.close()
+    user = User.query.filter_by(username=username).first()
 
     if not user:
         return jsonify({
-            "error": "Login inválido"
+            "error": "Utilizador não encontrado"
         }), 401
 
-    token = jwt.encode({
-        "username": username
-    }, SECRET_KEY, algorithm="HS256")
+    if not bcrypt.check_password_hash(user.password, password):
+        return jsonify({
+            "error": "Senha inválida"
+        }), 401
+
+    token = create_access_token(
+        identity=username,
+        expires_delta=datetime.timedelta(hours=24)
+    )
 
     return jsonify({
-        "token": token
+        "token": token,
+        "user": username
     })
 
 
@@ -145,51 +126,18 @@ def login():
 # BALANCE
 # =========================
 
-@app.route("/balance", methods=["GET"])
-def balance():
+@app.route('/balance/<username>', methods=['GET'])
+def balance(username):
 
-    token = request.headers.get("Authorization")
+    user = User.query.filter_by(username=username).first()
 
-    if not token:
+    if not user:
         return jsonify({
-            "error": "Token missing"
-        }), 401
-
-    try:
-
-        data = jwt.decode(
-            token,
-            SECRET_KEY,
-            algorithms=["HS256"]
-        )
-
-        username = data["username"]
-
-    except:
-        return jsonify({
-            "error": "Invalid token"
-        }), 401
-
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-
-    cursor.execute("""
-    SELECT balance FROM users
-    WHERE username=?
-    """, (username,))
-
-    result = cursor.fetchone()
-
-    conn.close()
-
-    if not result:
-        return jsonify({
-            "error": "User not found"
+            "error": "Utilizador não encontrado"
         }), 404
 
     return jsonify({
-        "username": username,
-        "balance": result[0]
+        "balance": user.balance
     })
 
 
@@ -197,115 +145,55 @@ def balance():
 # TRANSFER
 # =========================
 
-@app.route("/transfer", methods=["POST"])
+@app.route('/transfer', methods=['POST'])
+@jwt_required()
 def transfer():
-
-    token = request.headers.get("Authorization")
-
-    if not token:
-        return jsonify({
-            "error": "Token missing"
-        }), 401
-
-    try:
-
-        data_token = jwt.decode(
-            token,
-            SECRET_KEY,
-            algorithms=["HS256"]
-        )
-
-        username = data_token["username"]
-
-    except:
-        return jsonify({
-            "error": "Invalid token"
-        }), 401
 
     data = request.json
 
-    receiver = data.get("receiver")
-    amount = int(data.get("amount"))
+    sender = get_jwt_identity()
+
+    recipient = data.get('recipient')
+
+    amount = float(data.get('amount'))
+
+    sender_user = User.query.filter_by(username=sender).first()
+
+    recipient_user = User.query.filter_by(
+        username=recipient
+    ).first()
+
+    if not recipient_user:
+
+        return jsonify({
+            "error": "Destinatário não encontrado"
+        }), 404
 
     if amount <= 0:
+
         return jsonify({
             "error": "Valor inválido"
         }), 400
 
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-
-    # remetente
-    cursor.execute("""
-    SELECT balance FROM users
-    WHERE username=?
-    """, (username,))
-
-    sender_data = cursor.fetchone()
-
-    if not sender_data:
-        conn.close()
-
-        return jsonify({
-            "error": "Utilizador não encontrado"
-        }), 404
-
-    sender_balance = sender_data[0]
-
-    if sender_balance < amount:
-        conn.close()
+    if sender_user.balance < amount:
 
         return jsonify({
             "error": "Saldo insuficiente"
         }), 400
 
-    # destinatário
-    cursor.execute("""
-    SELECT * FROM users
-    WHERE username=?
-    """, (receiver,))
+    sender_user.balance -= amount
 
-    receiver_data = cursor.fetchone()
+    recipient_user.balance += amount
 
-    if not receiver_data:
-        conn.close()
-
-        return jsonify({
-            "error": "Destinatário não existe"
-        }), 404
-
-    # atualizar remetente
-    cursor.execute("""
-    UPDATE users
-    SET balance = balance - ?
-    WHERE username=?
-    """, (amount, username))
-
-    # atualizar destinatário
-    cursor.execute("""
-    UPDATE users
-    SET balance = balance + ?
-    WHERE username=?
-    """, (amount, receiver))
-
-    # histórico
-    cursor.execute("""
-    INSERT INTO history(
-        sender,
-        receiver,
-        amount,
-        created_at
+    transaction = Transaction(
+        sender=sender,
+        recipient=recipient,
+        amount=amount
     )
-    VALUES (?, ?, ?, ?)
-    """, (
-        username,
-        receiver,
-        amount,
-        datetime.now().strftime("%d/%m/%Y %H:%M")
-    ))
 
-    conn.commit()
-    conn.close()
+    db.session.add(transaction)
+
+    db.session.commit()
 
     return jsonify({
         "message": "Transferência realizada"
@@ -313,70 +201,79 @@ def transfer():
 
 
 # =========================
-# HISTORY
+# HISTÓRICO
 # =========================
 
-@app.route("/history", methods=["GET"])
-def history():
+@app.route('/transactions', methods=['GET'])
+def transactions():
 
-    token = request.headers.get("Authorization")
+    all_transactions = Transaction.query.order_by(
+        Transaction.id.desc()
+    ).all()
 
-    if not token:
-        return jsonify({
-            "error": "Token missing"
-        }), 401
+    result = []
 
-    try:
+    for tx in all_transactions:
 
-        data = jwt.decode(
-            token,
-            SECRET_KEY,
-            algorithms=["HS256"]
-        )
-
-        username = data["username"]
-
-    except:
-        return jsonify({
-            "error": "Invalid token"
-        }), 401
-
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-
-    cursor.execute("""
-    SELECT sender, receiver, amount, created_at
-    FROM history
-    WHERE sender=? OR receiver=?
-    ORDER BY id DESC
-    """, (username, username))
-
-    rows = cursor.fetchall()
-
-    conn.close()
-
-    history = []
-
-    for row in rows:
-
-        history.append({
-            "sender": row[0],
-            "receiver": row[1],
-            "amount": row[2],
-            "date": row[3]
+        result.append({
+            "sender": tx.sender,
+            "recipient": tx.recipient,
+            "amount": tx.amount,
+            "created_at": str(tx.created_at)
         })
 
-    return jsonify(history)
+    return jsonify(result)
 
 
 # =========================
-# RUN
+# CRIAR UTILIZADOR
 # =========================
 
-if __name__ == "__main__":
+@app.route('/create-user', methods=['POST'])
+def create_user():
+
+    data = request.json
+
+    username = data.get('username')
+    password = data.get('password')
+
+    exists = User.query.filter_by(
+        username=username
+    ).first()
+
+    if exists:
+
+        return jsonify({
+            "error": "Utilizador já existe"
+        }), 400
+
+    hashed = bcrypt.generate_password_hash(
+        password
+    ).decode('utf-8')
+
+    user = User(
+        username=username,
+        password=hashed,
+        balance=0
+    )
+
+    db.session.add(user)
+
+    db.session.commit()
+
+    return jsonify({
+        "message": "Utilizador criado"
+    })
+
+
+# =========================
+# SERVER
+# =========================
+
+if __name__ == '__main__':
 
     app.run(
-        host="0.0.0.0",
+        host='0.0.0.0',
         port=5000,
-        threaded=True
+        debug=False
     )

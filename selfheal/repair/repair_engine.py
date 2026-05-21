@@ -1,15 +1,18 @@
 class RepairEngine:
 
-    def repair(
+    def repair(self, failures):
 
-        self,
+        repaired = []
 
-        node
-    ):
+        for system in failures:
 
-        return {
+            repaired.append({
 
-            "node": node,
+                "system": system,
 
-            "repair": "SUCCESS"
-        }
+                "repair": "AUTO_REPAIR",
+
+                "status": "COMPLETED"
+            })
+
+        return repaired

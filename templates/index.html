@@ -1,323 +1,504 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>NUVIBANK V10</title>
+    <meta charset="UTF-8">
 
-<style>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial;
-}
+    <title>NUVIBANK V10</title>
 
-body{
-    background:#06006d;
-    color:white;
-    padding:30px;
-}
+    <style>
 
-.logo{
-    font-size:70px;
-    font-weight:bold;
-    margin-top:20px;
-}
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, sans-serif;
+        }
 
-.card{
-    background:#3b36a0;
-    padding:35px;
-    border-radius:40px;
-    margin-top:40px;
-}
+        body{
 
-h1{
-    font-size:40px;
-    margin-bottom:25px;
-}
+            background:#07006b;
+            color:white;
+            padding:30px;
+        }
 
-input{
-    width:100%;
-    padding:25px;
-    border:none;
-    border-radius:30px;
-    margin-top:20px;
-    font-size:20px;
-    background:#7f84df;
-    color:white;
-}
+        h1{
+            font-size:60px;
+            margin-bottom:20px;
+        }
 
-input::placeholder{
-    color:#555;
-}
+        .logo{
+            font-size:80px;
+            margin-bottom:20px;
+        }
 
-button{
-    width:100%;
-    padding:25px;
-    border:none;
-    border-radius:40px;
-    margin-top:25px;
-    font-size:24px;
-    font-weight:bold;
-    color:white;
-    background:linear-gradient(90deg,#8a2be2,#ff4da6);
-}
+        .card{
 
-.history-item{
-    margin-top:15px;
-    background:#5a56c0;
-    padding:15px;
-    border-radius:20px;
-}
+            background:rgba(255,255,255,0.15);
 
-</style>
+            padding:30px;
+
+            border-radius:30px;
+
+            margin-bottom:30px;
+        }
+
+        h2{
+            font-size:50px;
+            margin-bottom:25px;
+        }
+
+        input{
+
+            width:100%;
+
+            padding:25px;
+
+            border:none;
+
+            border-radius:25px;
+
+            margin-bottom:20px;
+
+            font-size:28px;
+
+            background:rgba(255,255,255,0.3);
+
+            color:white;
+        }
+
+        input::placeholder{
+            color:#d9d9d9;
+        }
+
+        button{
+
+            width:100%;
+
+            padding:25px;
+
+            border:none;
+
+            border-radius:40px;
+
+            font-size:32px;
+
+            font-weight:bold;
+
+            color:white;
+
+            background:linear-gradient(
+                90deg,
+                #8a2be2,
+                #ff3ea5
+            );
+
+            cursor:pointer;
+        }
+
+        p{
+            font-size:28px;
+            margin-bottom:10px;
+        }
+
+        small{
+            font-size:20px;
+            opacity:0.8;
+        }
+
+        #history div{
+
+            padding:20px;
+
+            border-radius:20px;
+
+            margin-top:15px;
+
+            background:rgba(255,255,255,0.1);
+        }
+
+    </style>
+
 </head>
 
 <body>
 
-<div style="font-size:70px;">🏦</div>
+    <div class="logo">🏦</div>
 
-<div class="logo">
-NUVIBANK V10
-</div>
+    <h1>NUVIBANK V10</h1>
 
-<div class="card">
-<h1>Servidor Online</h1>
-<p style="font-size:25px;">
-Sistema financeiro operacional.
-</p>
-</div>
+    <div class="card">
 
-<div class="card">
+        <h2>Servidor Online</h2>
 
-<h1>Criar Conta</h1>
+        <p>Sistema financeiro operacional.</p>
 
-<input type="text" id="register_name" placeholder="Nome">
+    </div>
 
-<input type="password" id="register_password" placeholder="Password">
 
-<button onclick="register()">
-Criar Conta
-</button>
+    <!-- REGISTER -->
 
-</div>
+    <div class="card">
 
-<div class="card">
+        <h2>Criar Conta</h2>
 
-<h1>Login</h1>
+        <input
+            type="text"
+            id="register_username"
+            placeholder="Nome">
 
-<input type="text" id="login_name" placeholder="Nome">
+        <input
+            type="password"
+            id="register_password"
+            placeholder="Password">
 
-<input type="password" id="login_password" placeholder="Password">
+        <button onclick="register()">
+            Criar Conta
+        </button>
 
-<button onclick="login()">
-Entrar
-</button>
+    </div>
 
-</div>
 
-<div class="card">
+    <!-- LOGIN -->
 
-<h1>Conta</h1>
+    <div class="card">
 
-<div id="account">
-Nenhum utilizador conectado
-</div>
+        <h2>Login</h2>
 
-</div>
+        <input
+            type="text"
+            id="login_username"
+            placeholder="Nome">
 
-<div class="card">
+        <input
+            type="password"
+            id="login_password"
+            placeholder="Password">
 
-<h1>Transferir</h1>
+        <button onclick="login()">
+            Entrar
+        </button>
 
-<input type="text" id="receiver" placeholder="Destinatário">
+    </div>
 
-<input type="number" id="amount" placeholder="Valor">
 
-<button onclick="transfer()">
-Transferir
-</button>
+    <!-- ACCOUNT -->
 
-</div>
+    <div class="card">
 
-<div class="card">
+        <h2>Conta</h2>
 
-<h1>Histórico</h1>
+        <div id="account_info">
 
-<div id="history">
-Sem transações
-</div>
+            <p>Nenhum utilizador conectado</p>
 
-</div>
+        </div>
 
-<script>
+    </div>
 
-let token = ""
 
-async function register(){
+    <!-- TRANSFER -->
 
-    const username =
-    document.getElementById("register_name").value
+    <div class="card">
 
-    const password =
-    document.getElementById("register_password").value
+        <h2>Transferir</h2>
 
-    const response = await fetch("/register",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            username,
-            password
-        })
-    })
+        <input
+            type="text"
+            id="receiver"
+            placeholder="Destinatário">
 
-    const data = await response.json()
+        <input
+            type="number"
+            id="amount"
+            placeholder="Valor">
 
-    alert(data.message)
-}
+        <button onclick="transfer()">
+            Transferir
+        </button>
 
-async function login(){
+    </div>
 
-    const username =
-    document.getElementById("login_name").value
 
-    const password =
-    document.getElementById("login_password").value
+    <!-- HISTORY -->
 
-    const response = await fetch("/login",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            username,
-            password
-        })
-    })
+    <div class="card">
 
-    const data = await response.json()
+        <h2>Histórico</h2>
 
-    if(data.token){
+        <div id="history">
 
-        token = data.token
+            <p>Sem transações</p>
 
-        alert("Login realizado")
+        </div>
 
-        await loadAccount()
+    </div>
 
-        await loadHistory()
 
-        window.scrollTo({
-            top:document.body.scrollHeight,
-            behavior:"smooth"
-        })
+    <script>
 
-    }else{
+        let TOKEN = "";
 
-        alert(data.message)
-    }
-}
 
-async function loadAccount(){
+        // =====================================
+        // REGISTER
+        // =====================================
 
-    const response = await fetch("/balance",{
-        headers:{
-            "Authorization":"Bearer " + token
+        async function register() {
+
+            const username =
+                document.getElementById(
+                    "register_username"
+                ).value;
+
+            const password =
+                document.getElementById(
+                    "register_password"
+                ).value;
+
+            const response = await fetch(
+                "/register",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        username,
+                        password
+                    })
+                }
+            );
+
+            const data =
+                await response.json();
+
+            if(response.ok){
+
+                alert(data.message);
+
+            }else{
+
+                alert(data.error);
+            }
         }
-    })
 
-    const data = await response.json()
 
-    document.getElementById("account").innerHTML = `
-    <p style="font-size:25px;">
-    Utilizador: ${data.username}
-    </p>
+        // =====================================
+        // LOGIN
+        // =====================================
 
-    <p style="font-size:25px;">
-    Saldo: ${data.balance} KZ
-    </p>
-    `
-}
+        async function login() {
 
-async function transfer(){
+            const username =
+                document.getElementById(
+                    "login_username"
+                ).value;
 
-    if(token === ""){
-        alert("Faça login primeiro")
-        return
-    }
+            const password =
+                document.getElementById(
+                    "login_password"
+                ).value;
 
-    const receiver =
-    document.getElementById("receiver").value
+            const response = await fetch(
+                "/login",
+                {
+                    method: "POST",
 
-    const amount =
-    document.getElementById("amount").value
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-    const response = await fetch("/transfer",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json",
-            "Authorization":"Bearer " + token
-        },
-        body:JSON.stringify({
-            receiver,
-            amount
-        })
-    })
+                    body: JSON.stringify({
+                        username,
+                        password
+                    })
+                }
+            );
 
-    const data = await response.json()
+            const data =
+                await response.json();
 
-    alert(data.message)
+            if(response.ok){
 
-    await loadAccount()
+                TOKEN = data.token;
 
-    await loadHistory()
-}
+                alert("Login realizado");
 
-async function loadHistory(){
+                loadBalance();
+                loadHistory();
 
-    const response = await fetch("/history",{
-        headers:{
-            "Authorization":"Bearer " + token
+            }else{
+
+                alert(data.error);
+            }
         }
-    })
 
-    const data = await response.json()
 
-    let html = ""
+        // =====================================
+        // BALANCE
+        // =====================================
 
-    if(data.history.length === 0){
+        async function loadBalance() {
 
-        html = "Sem transações"
+            const response = await fetch(
+                "/balance",
+                {
+                    headers:{
+                        "Authorization":
+                            TOKEN
+                    }
+                }
+            );
 
-    }else{
+            const data =
+                await response.json();
 
-        data.history.forEach(item => {
+            if(response.ok){
 
-            html += `
-            <div class="history-item">
+                document.getElementById(
+                    "account_info"
+                ).innerHTML = `
+                    <p>
+                        <strong>
+                            ${data.username}
+                        </strong>
+                    </p>
 
-            <p>
-            Para: ${item.receiver}
-            </p>
+                    <p>
+                        Saldo:
+                        ${data.balance} AKZ
+                    </p>
+                `;
+            }
+        }
 
-            <p>
-            Valor: ${item.amount} KZ
-            </p>
 
-            </div>
-            `
-        })
-    }
+        // =====================================
+        // TRANSFER
+        // =====================================
 
-    document.getElementById("history").innerHTML = html
-}
+        async function transfer() {
 
-</script>
+            const receiver =
+                document.getElementById(
+                    "receiver"
+                ).value;
+
+            const amount =
+                document.getElementById(
+                    "amount"
+                ).value;
+
+            const response = await fetch(
+                "/transfer",
+                {
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            TOKEN
+                    },
+
+                    body: JSON.stringify({
+                        receiver,
+                        amount
+                    })
+                }
+            );
+
+            const data =
+                await response.json();
+
+            if(response.ok){
+
+                alert(data.message);
+
+                loadBalance();
+                loadHistory();
+
+            }else{
+
+                alert(data.error);
+            }
+        }
+
+
+        // =====================================
+        // HISTORY
+        // =====================================
+
+        async function loadHistory() {
+
+            const response = await fetch(
+                "/history",
+                {
+                    headers:{
+                        "Authorization":
+                            TOKEN
+                    }
+                }
+            );
+
+            const data =
+                await response.json();
+
+            if(response.ok){
+
+                const historyDiv =
+                    document.getElementById(
+                        "history"
+                    );
+
+                historyDiv.innerHTML = "";
+
+                if(data.length === 0){
+
+                    historyDiv.innerHTML =
+                        "<p>Sem transações</p>";
+
+                    return;
+                }
+
+                data.forEach(item => {
+
+                    historyDiv.innerHTML += `
+
+                        <div>
+
+                            <p>
+                                ${item.sender}
+                                →
+                                ${item.receiver}
+                            </p>
+
+                            <p>
+                                ${item.amount} AKZ
+                            </p>
+
+                            <small>
+                                ${item.date}
+                            </small>
+
+                        </div>
+                    `;
+                });
+            }
+        }
+
+    </script>
 
 </body>
+
 </html>

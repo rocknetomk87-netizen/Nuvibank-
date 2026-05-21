@@ -1,12 +1,12 @@
-import asyncio
+from datetime import datetime
+
 
 class AsyncRuntime:
 
-    async def runtime(self):
-
-        await asyncio.sleep(1)
+    def status(self):
 
         return {
-            "runtime": "ASYNC_RUNTIME",
-            "status": "ACTIVE"
+            "runtime": "ASYNC_RUNTIME_ACTIVE",
+            "timestamp": str(datetime.utcnow()),
+            "status": "RUNNING"
         }

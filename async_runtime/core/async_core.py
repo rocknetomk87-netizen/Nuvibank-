@@ -1,41 +1,29 @@
-import asyncio
+from async_runtime.workers.async_worker import (
+    AsyncWorker
+)
 
-from async.events.async_event_engine import AsyncEventEngine
-from async.queue.async_queue import AsyncQueue
-from async.workers.async_workers import AsyncWorkers
-from async.runtime.async_runtime import AsyncRuntime
+from async_runtime.runtime.async_runtime import (
+    AsyncRuntime
+)
+
 
 class AsyncCore:
 
     def __init__(self):
 
-        self.events = AsyncEventEngine()
-
-        self.queue = AsyncQueue()
-
-        self.workers = AsyncWorkers()
+        self.worker = AsyncWorker()
 
         self.runtime = AsyncRuntime()
 
-    async def execute(self):
+    async def execute(self, tasks):
 
-        event = await self.events.emit(
-            "FRAUD_ALERT"
+        results = await self.worker.run_tasks(
+            tasks
         )
 
-        queued = await self.queue.enqueue(
-            event
-        )
-
-        worker = await self.workers.process(
-            queued
-        )
-
-        runtime = await self.runtime.runtime()
+        runtime = self.runtime.status()
 
         return {
-            "event": event,
-            "queue": queued,
-            "worker": worker,
+            "results": results,
             "runtime": runtime
         }

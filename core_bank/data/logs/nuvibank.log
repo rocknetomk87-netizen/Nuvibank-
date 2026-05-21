@@ -1,0 +1,266 @@
+2026-05-06 21:26:23,611 | INFO | NUVIBANK SERVER STARTED
+2026-05-06 21:26:23,660 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.46.181.68:5000
+2026-05-06 21:26:23,660 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-06 21:28:15,134 | INFO | NUVIBANK SERVER STARTED
+2026-05-06 21:28:15,186 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.46.181.68:5000
+2026-05-06 21:28:15,186 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-06 21:34:56,185 | INFO | NUVIBANK SERVER STARTED
+2026-05-06 21:34:56,243 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.46.181.68:5000
+2026-05-06 21:34:56,244 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-06 21:35:57,289 | INFO | NUVIBANK SERVER STARTED
+2026-05-06 21:35:57,321 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.46.181.68:5000
+2026-05-06 21:35:57,321 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-06 21:45:06,832 | INFO | NUVIBANK SERVER STARTED
+2026-05-06 21:45:06,981 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-06 21:45:06,981 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-06 21:45:06,988 | INFO |  * Restarting with stat
+2026-05-06 21:45:07,704 | INFO | NUVIBANK SERVER STARTED
+2026-05-06 21:45:07,755 | WARNING |  * Debugger is active!
+2026-05-06 21:45:07,863 | INFO |  * Debugger PIN: 141-749-061
+2026-05-06 21:46:13,753 | INFO | NUVIBANK SERVER STARTED
+2026-05-06 21:46:13,857 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-06 21:46:13,857 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-06 21:46:13,862 | INFO |  * Restarting with stat
+2026-05-06 21:46:14,648 | INFO | NUVIBANK SERVER STARTED
+2026-05-06 21:46:14,701 | WARNING |  * Debugger is active!
+2026-05-06 21:46:14,774 | INFO |  * Debugger PIN: 398-741-891
+2026-05-06 21:47:20,921 | INFO | 127.0.0.1 - - [06/May/2026 21:47:20] "GET / HTTP/1.1" 200 -
+2026-05-06 21:47:20,922 | INFO | 127.0.0.1 - - [06/May/2026 21:47:20] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-05-06 21:47:38,331 | INFO | 127.0.0.1 - - [06/May/2026 21:47:38] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-05-06 21:48:52,647 | INFO | 127.0.0.1 - - [06/May/2026 21:48:52] "GET / HTTP/1.1" 200 -
+2026-05-06 21:48:52,650 | INFO | 127.0.0.1 - - [06/May/2026 21:48:52] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-05-06 23:57:37,830 | INFO | NUVIBANK SERVER STARTED
+2026-05-06 23:57:37,867 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-06 23:57:37,868 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-06 23:59:00,153 | INFO | 127.0.0.1 - - [06/May/2026 23:59:00] "GET / HTTP/1.1" 200 -
+2026-05-06 23:59:00,148 | INFO | 127.0.0.1 - - [06/May/2026 23:59:00] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-05-07 02:30:30,936 | INFO | NUVIBANK SERVER STARTED
+2026-05-07 02:30:31,000 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-07 02:30:31,000 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-07 02:33:16,711 | INFO | NUVIBANK SERVER STARTED
+2026-05-07 02:33:16,748 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-07 02:33:16,749 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-07 02:34:32,483 | INFO | 127.0.0.1 - - [07/May/2026 02:34:32] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-05-07 02:34:40,055 | INFO | 127.0.0.1 - - [07/May/2026 02:34:40] "GET / HTTP/1.1" 200 -
+2026-05-07 02:34:40,501 | ERROR | TOKEN ERROR: Signature verification failed
+2026-05-07 02:34:40,505 | INFO | 127.0.0.1 - - [07/May/2026 02:34:40] "GET /me HTTP/1.1" 200 -
+2026-05-07 02:35:21,797 | ERROR | REGISTER ERROR: NOT NULL constraint failed: users.name
+2026-05-07 02:35:21,804 | INFO | 127.0.0.1 - - [07/May/2026 02:35:21] "POST /register HTTP/1.1" 200 -
+2026-05-07 02:35:44,313 | ERROR | REGISTER ERROR: NOT NULL constraint failed: users.name
+2026-05-07 02:35:44,318 | INFO | 127.0.0.1 - - [07/May/2026 02:35:44] "POST /register HTTP/1.1" 200 -
+2026-05-07 02:35:44,370 | ERROR | REGISTER ERROR: NOT NULL constraint failed: users.name
+2026-05-07 02:35:44,371 | INFO | 127.0.0.1 - - [07/May/2026 02:35:44] "POST /register HTTP/1.1" 200 -
+2026-05-07 02:36:16,611 | INFO | 127.0.0.1 - - [07/May/2026 02:36:16] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-05-07 02:36:16,627 | INFO | 127.0.0.1 - - [07/May/2026 02:36:16] "POST /login HTTP/1.1" 200 -
+2026-05-07 02:36:44,696 | ERROR | REGISTER ERROR: NOT NULL constraint failed: users.name
+2026-05-07 02:36:44,701 | INFO | 127.0.0.1 - - [07/May/2026 02:36:44] "POST /register HTTP/1.1" 200 -
+2026-05-07 11:53:44,095 | INFO | NUVIBANK SERVER STARTED
+2026-05-07 11:53:44,129 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-07 11:53:44,129 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-07 11:54:38,972 | INFO | 127.0.0.1 - - [07/May/2026 11:54:38] "GET / HTTP/1.1" 200 -
+2026-05-07 11:54:38,940 | INFO | 127.0.0.1 - - [07/May/2026 11:54:38] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-05-07 11:55:22,625 | INFO | NEW USER REGISTERED: TesteA
+2026-05-07 11:55:22,633 | INFO | 127.0.0.1 - - [07/May/2026 11:55:22] "POST /register HTTP/1.1" 200 -
+2026-05-07 11:56:03,485 | INFO | LOGIN SUCCESS: TesteA
+2026-05-07 11:56:03,491 | INFO | 127.0.0.1 - - [07/May/2026 11:56:03] "POST /login HTTP/1.1" 200 -
+2026-05-07 11:56:06,974 | INFO | 127.0.0.1 - - [07/May/2026 11:56:06] "GET /me HTTP/1.1" 200 -
+2026-05-07 12:11:44,900 | INFO | NUVIBANK SERVER STARTED
+2026-05-07 12:11:44,934 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-07 12:11:44,934 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-07 12:12:13,664 | INFO | 127.0.0.1 - - [07/May/2026 12:12:13] "GET / HTTP/1.1" 200 -
+2026-05-07 12:12:35,298 | INFO | NEW USER REGISTERED: João 
+2026-05-07 12:12:35,300 | INFO | 127.0.0.1 - - [07/May/2026 12:12:35] "POST /register HTTP/1.1" 200 -
+2026-05-07 12:12:45,647 | INFO | 127.0.0.1 - - [07/May/2026 12:12:45] "GET / HTTP/1.1" 200 -
+2026-05-07 12:12:59,242 | INFO | LOGIN SUCCESS: João 
+2026-05-07 12:12:59,244 | INFO | 127.0.0.1 - - [07/May/2026 12:12:59] "POST /login HTTP/1.1" 200 -
+2026-05-07 12:13:01,904 | INFO | 127.0.0.1 - - [07/May/2026 12:13:01] "GET /me HTTP/1.1" 200 -
+2026-05-07 12:13:01,914 | INFO | 127.0.0.1 - - [07/May/2026 12:13:01] "GET /history HTTP/1.1" 200 -
+2026-05-07 12:13:27,431 | INFO | DEPOSIT | USER=João  | VALUE=1000.0
+2026-05-07 12:13:27,444 | INFO | 127.0.0.1 - - [07/May/2026 12:13:27] "POST /deposit HTTP/1.1" 200 -
+2026-05-07 12:13:32,075 | ERROR | HISTORY ERROR: Recursive use of cursors not allowed.
+2026-05-07 12:13:32,078 | INFO | 127.0.0.1 - - [07/May/2026 12:13:32] "GET /history HTTP/1.1" 200 -
+2026-05-07 17:17:21,162 | INFO | NUVIBANK SERVER STARTED
+2026-05-07 17:17:21,199 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-07 17:17:21,199 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-07 17:18:20,034 | INFO | 127.0.0.1 - - [07/May/2026 17:18:20] "GET / HTTP/1.1" 200 -
+2026-05-07 17:20:12,262 | INFO | 127.0.0.1 - - [07/May/2026 17:20:12] "POST /register HTTP/1.1" 200 -
+2026-05-07 17:20:12,900 | INFO | USER CREATED: JOÃO 
+2026-05-07 17:20:12,902 | INFO | 127.0.0.1 - - [07/May/2026 17:20:12] "POST /register HTTP/1.1" 200 -
+2026-05-07 17:20:37,408 | ERROR | LOGIN ERROR: Recursive use of cursors not allowed.
+2026-05-07 17:20:37,434 | INFO | 127.0.0.1 - - [07/May/2026 17:20:37] "POST /login HTTP/1.1" 200 -
+2026-05-07 17:20:37,991 | INFO | 127.0.0.1 - - [07/May/2026 17:20:37] "POST /login HTTP/1.1" 200 -
+2026-05-07 17:20:57,528 | INFO | LOGIN SUCCESS: JOÃO 
+2026-05-07 17:20:57,529 | INFO | 127.0.0.1 - - [07/May/2026 17:20:57] "POST /login HTTP/1.1" 200 -
+2026-05-07 17:21:05,778 | INFO | 127.0.0.1 - - [07/May/2026 17:21:05] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.46.181.68:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.46.181.68:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 17:37:29] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 17:38:00] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 17:38:04] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 17:38:49] "POST /transfer HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 17:39:36] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 17:39:36] "POST /transfer HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 17:39:41] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 17:40:43] "POST /transfer HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 17:40:56] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.46.181.68:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:05:36] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:08:23] "POST /register HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:08:58] "POST /register HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:09:05] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:09:31] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:09:32] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:10:13] "POST /transfer HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:10:20] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.46.181.68:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:22:07] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:22:07] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:23:50] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:23:51] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:23:51] "GET /transactions HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:24:46] "POST /transfer HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:24:51] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 18:24:51] "GET /transactions HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 19:44:57] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/May/2026 19:44:57] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.43.118.94:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+ERROR:root:list index out of range
+ERROR:root:list index out of range
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:30:55] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:30:55] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:30:55] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:30:55] "GET /transactions HTTP/1.1" 200 -
+ERROR:root:argument 'hashed_password': 'str' object cannot be converted to 'PyBytes'
+ERROR:root:argument 'hashed_password': 'str' object cannot be converted to 'PyBytes'
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:31:51] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:31:51] "POST /login HTTP/1.1" 200 -
+ERROR:root:argument 'hashed_password': 'str' object cannot be converted to 'PyBytes'
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:32:01] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:32:27] "POST /login HTTP/1.1" 200 -
+ERROR:root:argument 'hashed_password': 'str' object cannot be converted to 'PyBytes'
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:32:54] "POST /login HTTP/1.1" 200 -
+ERROR:root:argument 'hashed_password': 'str' object cannot be converted to 'PyBytes'
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:33:05] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:33:10] "GET / HTTP/1.1" 200 -
+ERROR:root:argument 'hashed_password': 'str' object cannot be converted to 'PyBytes'
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:33:36] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:33:48] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.43.118.94:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:36:40] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.43.118.94:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+ERROR:root:ME ERROR: Signature verification failed
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:48:30] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:48:30] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+ERROR:root:TRANSACTION ERROR: Signature verification failed
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:48:30] "GET /transactions HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:48:30] "GET / HTTP/1.1" 200 -
+ERROR:root:TRANSACTION ERROR: Signature verification failed
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:48:30] "GET /transactions HTTP/1.1" 200 -
+ERROR:root:ADMIN ERROR: Signature verification failed
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:48:30] "GET /admin HTTP/1.1" 200 -
+ERROR:root:ME ERROR: Signature verification failed
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 02:48:30] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.51.54.176:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 20:09:40] "GET / HTTP/1.1" 200 -
+INFO:root:NEW USER: Timóteo
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 20:11:39] "POST /register HTTP/1.1" 200 -
+INFO:root:LOGIN: Timóteo 
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 20:12:12] "POST /login HTTP/1.1" 200 -
+INFO:root:LOGIN: Timóteo 
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 20:12:51] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.51.54.176:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:47:36] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:47:36] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:47:36] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:47:36] "GET /transactions HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:47:36] "GET /admin HTTP/1.1" 200 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.51.54.176:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:50:29] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:50:34] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:50:34] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:50:34] "GET /admin HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:50:34] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:50:34] "GET /transactions HTTP/1.1" 200 -
+INFO:root:LOGIN: Timóteo
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:51:23] "POST /login HTTP/1.1" 200 -
+INFO:root:LOGIN: Timóteo
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:51:52] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:52:43] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:54:07] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:56:50] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.51.54.176:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:57:55] "GET / HTTP/1.1" 200 -
+INFO:root:LOGIN: Timóteo
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:59:43] "POST /login HTTP/1.1" 200 -
+INFO:root:LOGIN: Timóteo
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:59:43] "POST /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:59:45] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:59:45] "GET /admin HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:59:45] "GET /transactions HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:59:47] "GET /transactions HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:59:47] "GET /me HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [08/May/2026 23:59:47] "GET /admin HTTP/1.1" 200 -

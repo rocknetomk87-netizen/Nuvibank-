@@ -1,15 +1,18 @@
 class RestartEngine:
 
-    def restart(
+    def restart(self, failures):
 
-        self,
+        restarted = []
 
-        worker
-    ):
+        for system in failures:
 
-        return {
+            restarted.append({
 
-            "worker": worker,
+                "system": system,
 
-            "restart": "DONE"
-        }
+                "restart": "RESTART_TRIGGERED",
+
+                "status": "ACTIVE"
+            })
+
+        return restarted

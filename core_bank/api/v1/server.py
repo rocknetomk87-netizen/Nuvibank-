@@ -1,140 +1,266 @@
-from flask import request, jsonify
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import (
+    create_access_token,
+    jwt_required,
+    get_jwt_identity
+)
 
-from core_bank.core_app import db
+from core_bank.extensions import db, limiter
+from core_bank.models.user import User
+from core_bank.models.transaction import Transaction
 
-from core_bank.banking.users.user_model import User
-from core_bank.banking.wallets.wallet_model import Wallet
-
-from core_bank.security.auth_engine import AuthEngine
-
-from core_bank.ledger.journal.journal_entry import JournalEntry
+api = Blueprint("api", __name__)
 
 
-def register_routes(app):
+# =========================
+# REGISTER
+# =========================
+@api.post("/register")
+@limiter.limit("5 per minute")
+def register():
 
-    @app.route("/")
-    def home():
+    data = request.get_json()
 
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")
+
+    if not username or not email or not password:
         return jsonify({
-            "status": "NUVIBANK CORE ONLINE"
+            "status": "error",
+            "message": "missing_fields"
+        }), 400
+
+    existing_user = User.query.filter_by(email=email).first()
+
+    if existing_user:
+        return jsonify({
+            "status": "error",
+            "message": "user_exists"
+        }), 409
+
+    user = User(
+        username=username,
+        email=email
+    )
+
+    user.set_password(password)
+
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({
+        "status": "success",
+        "message": "user_created"
+    }), 201
+
+
+# =========================
+# LOGIN
+# =========================
+@api.post("/login")
+@limiter.limit("5 per minute")
+def login():
+
+    data = request.get_json()
+
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({
+            "status": "error",
+            "message": "missing_credentials"
+        }), 400
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({
+            "status": "error",
+            "message": "invalid_credentials"
+        }), 401
+
+    if not user.check_password(password):
+        return jsonify({
+            "status": "error",
+            "message": "invalid_credentials"
+        }), 401
+
+    token = create_access_token(identity=str(user.id))
+
+    return jsonify({
+        "status": "success",
+        "access_token": token
+    }), 200
+
+
+# =========================
+# BALANCE
+# =========================
+@api.get("/balance")
+@jwt_required()
+def balance():
+
+    user_id = get_jwt_identity()
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({
+            "status": "error",
+            "message": "user_not_found"
+        }), 404
+
+    return jsonify({
+        "status": "success",
+        "balance": float(user.balance)
+    }), 200
+
+
+# =========================
+# DEPOSIT
+# =========================
+@api.post("/deposit")
+@jwt_required()
+def deposit():
+
+    user_id = get_jwt_identity()
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({
+            "status": "error",
+            "message": "user_not_found"
+        }), 404
+
+    data = request.get_json()
+
+    amount = float(data.get("amount", 0))
+
+    if amount <= 0:
+        return jsonify({
+            "status": "error",
+            "message": "invalid_amount"
+        }), 400
+
+    user.balance += amount
+
+    transaction = Transaction(
+        user_id=user.id,
+        type="deposit",
+        amount=amount,
+        description="Balance deposit"
+    )
+
+    db.session.add(transaction)
+    db.session.commit()
+
+    return jsonify({
+        "status": "success",
+        "balance": float(user.balance)
+    }), 200
+
+
+# =========================
+# TRANSFER
+# =========================
+@api.post("/transfer")
+@jwt_required()
+def transfer():
+
+    sender_id = get_jwt_identity()
+
+    sender = User.query.get(sender_id)
+
+    if not sender:
+        return jsonify({
+            "status": "error",
+            "message": "sender_not_found"
+        }), 404
+
+    data = request.get_json()
+
+    receiver_email = data.get("to")
+    amount = float(data.get("amount", 0))
+
+    if amount <= 0:
+        return jsonify({
+            "status": "error",
+            "message": "invalid_amount"
+        }), 400
+
+    receiver = User.query.filter_by(email=receiver_email).first()
+
+    if not receiver:
+        return jsonify({
+            "status": "error",
+            "message": "receiver_not_found"
+        }), 404
+
+    if sender.balance < amount:
+        return jsonify({
+            "status": "error",
+            "message": "insufficient_balance"
+        }), 400
+
+    sender.balance -= amount
+    receiver.balance += amount
+
+    sender_transaction = Transaction(
+        user_id=sender.id,
+        type="transfer_out",
+        amount=amount,
+        description=f"Transfer to {receiver.email}"
+    )
+
+    receiver_transaction = Transaction(
+        user_id=receiver.id,
+        type="transfer_in",
+        amount=amount,
+        description=f"Transfer from {sender.email}"
+    )
+
+    db.session.add(sender_transaction)
+    db.session.add(receiver_transaction)
+
+    db.session.commit()
+
+    return jsonify({
+        "status": "success",
+        "message": "transfer_completed",
+        "sender_balance": float(sender.balance)
+    }), 200
+
+
+# =========================
+# TRANSACTIONS
+# =========================
+@api.get("/transactions")
+@jwt_required()
+def transactions():
+
+    user_id = get_jwt_identity()
+
+    transactions = Transaction.query.filter_by(
+        user_id=user_id
+    ).order_by(
+        Transaction.created_at.desc()
+    ).all()
+
+    data = []
+
+    for tx in transactions:
+        data.append({
+            "id": tx.id,
+            "type": tx.type,
+            "amount": float(tx.amount),
+            "description": tx.description,
+            "created_at": str(tx.created_at)
         })
 
-    @app.route("/create_user", methods=["POST"])
-    def create_user():
-
-        data = request.get_json()
-
-        username = data.get("username")
-        email = data.get("email")
-        password = data.get("password")
-
-        existing_user = User.query.filter(
-            (User.username == username) |
-            (User.email == email)
-        ).first()
-
-        if existing_user:
-
-            return jsonify({
-                "status": "error",
-                "message": "user_already_exists"
-            }), 400
-
-        hashed_password = AuthEngine.hash_password(password)
-
-        user = User(
-            username=username,
-            email=email,
-            password=hashed_password
-        )
-
-        db.session.add(user)
-        db.session.commit()
-
-        wallet = Wallet(
-            user_id=user.id,
-            balance=1000.0
-        )
-
-        db.session.add(wallet)
-        db.session.commit()
-
-        token = AuthEngine.generate_token(
-            user.id,
-            user.username
-        )
-
-        return jsonify({
-            "status": "user_created",
-            "user_id": user.id,
-            "wallet_id": wallet.id,
-            "username": user.username,
-            "email": user.email,
-            "balance": wallet.balance,
-            "token": token
-        })
-
-    @app.route("/login", methods=["POST"])
-    def login():
-
-        data = request.get_json()
-
-        email = data.get("email")
-        password = data.get("password")
-
-        user = User.query.filter_by(
-            email=email
-        ).first()
-
-        if not user:
-
-            return jsonify({
-                "status": "error",
-                "message": "invalid_credentials"
-            }), 401
-
-        valid_password = AuthEngine.verify_password(
-            password,
-            user.password
-        )
-
-        if not valid_password:
-
-            return jsonify({
-                "status": "error",
-                "message": "invalid_credentials"
-            }), 401
-
-        token = AuthEngine.generate_token(
-            user.id,
-            user.username
-        )
-
-        return jsonify({
-            "status": "success",
-            "token": token,
-            "user": user.to_dict()
-        })
-
-    @app.route("/journal")
-    def journal():
-
-        entries = JournalEntry.query.all()
-
-        result = []
-
-        for entry in entries:
-
-            result.append({
-                "id": entry.id,
-                "transaction_id": entry.transaction_id,
-                "account_id": entry.account_id,
-                "account_type": entry.account_type,
-                "entry_type": entry.entry_type,
-                "amount": entry.amount,
-                "currency": entry.currency,
-                "description": entry.description,
-                "created_at": str(entry.created_at)
-            })
-
-        return jsonify(result)
+    return jsonify({
+        "status": "success",
+        "transactions": data
+    }), 200

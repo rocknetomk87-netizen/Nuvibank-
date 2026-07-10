@@ -1,9 +1,18 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
+
 
 class LedgerEngine:
+    """
+    Ledger Engine experimental do NUVIBANK.
+
+    Regista eventos financeiros básicos.
+    O ledger principal de dupla entrada permanece
+    no módulo core_bank.ledger.
+    """
 
     ledger = []
+
 
     @classmethod
     def record(
@@ -15,27 +24,25 @@ class LedgerEngine:
 
         transaction = {
 
-            "tx_id":
-                str(uuid.uuid4()),
+            "tx_id": str(uuid.uuid4()),
 
-            "sender":
-                sender,
+            "sender": sender,
 
-            "receiver":
-                receiver,
+            "receiver": receiver,
 
-            "amount":
-                amount,
+            "amount": str(amount),
 
-            "timestamp":
-                str(datetime.utcnow())
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
+
 
         cls.ledger.append(
             transaction
         )
 
+
         return transaction
+
 
     @classmethod
     def get_ledger(cls):

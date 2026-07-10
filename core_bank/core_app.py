@@ -1,26 +1,43 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
 
-from core_bank.config import Config
+from core_bank.extensions import db, migrate
+from core_bank.config import (
+    SECRET_KEY,
+    DATABASE_URL
+)
 
-db = SQLAlchemy()
+from core_bank.models import User, Account, Transaction
 
-jwt = JWTManager()
+from core_bank.routes.auth import auth_bp
+from core_bank.routes.transactions import transactions_bp
 
 
 def create_app():
-
     app = Flask(__name__)
 
-    app.config.from_object(Config)
+    # CONFIGURAÇÕES
+    app.config["SECRET_KEY"] = SECRET_KEY
+    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+    # EXTENSÕES
     db.init_app(app)
+    migrate.init_app(app, db)
 
-    jwt.init_app(app)
+    # BLUEPRINTS
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(transactions_bp)
 
-    from core_bank.api.v1.server import register_routes
-
-    register_routes(app)
+    # HEALTH CHECK
+    @app.route("/")
+    def home():
+        return {
+            "status": "online",
+            "system": "NUVIBANK CORE",
+            "version": "1.0"
+        }
 
     return app
+
+
+app = create_app()

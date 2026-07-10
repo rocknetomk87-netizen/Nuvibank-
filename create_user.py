@@ -1,22 +1,52 @@
-from app import app, db, User
+from core_bank.core_app import create_app, db
+from core_bank.models.user import User
 from werkzeug.security import generate_password_hash
+
+app = create_app()
 
 with app.app_context():
 
-    user_exists = User.query.filter_by(username="user1").first()
+    db.drop_all()
+    db.create_all()
 
-    if not user_exists:
+    # =========================
+    # ROCK USER
+    # =========================
 
-        user = User(
-            username="user1",
+    rock_exists = User.query.filter_by(
+        email="rock@nuvibank.com"
+    ).first()
+
+    if not rock_exists:
+
+        rock = User(
+            username="rock",
+            email="rock@nuvibank.com",
             password=generate_password_hash("123456"),
-            balance=5000
+            balance=1000.0
         )
 
-        db.session.add(user)
-        db.session.commit()
+        db.session.add(rock)
 
-        print("✅ USER1 CRIADO")
+    # =========================
+    # ALICE USER
+    # =========================
 
-    else:
-        print("⚠️ USER1 JÁ EXISTE")
+    alice_exists = User.query.filter_by(
+        email="alice@nuvibank.com"
+    ).first()
+
+    if not alice_exists:
+
+        alice = User(
+            username="alice",
+            email="alice@nuvibank.com",
+            password=generate_password_hash("123456"),
+            balance=500.0
+        )
+
+        db.session.add(alice)
+
+    db.session.commit()
+
+    print("✅ DATABASE CRIADA COM SUCESSO")

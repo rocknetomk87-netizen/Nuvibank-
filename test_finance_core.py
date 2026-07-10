@@ -1,16 +1,15 @@
-from finance.ledger.ledger_engine import LedgerEngine
+from core_bank.finance.ledger.ledger_engine import LedgerEngine
+from core_bank.finance.audit.audit_trail import AuditTrail
+from core_bank.finance.core.transaction_validator import TransactionValidator
 
-from finance.audit.audit_trail import AuditTrail
-
-from finance.core.transaction_validator import TransactionValidator
-
+print("=== FINANCE CORE TEST ===")
 
 valid = TransactionValidator.validate(
     sender_balance=10000,
     amount=5000
 )
 
-print(valid)
+print("Validation:", valid)
 
 if valid:
 
@@ -25,12 +24,17 @@ if valid:
         username="rock"
     )
 
+    print("Transaction:")
     print(tx)
 
-    print(
-        LedgerEngine.get_ledger()
-    )
+    print()
 
-    print(
-        AuditTrail.get_logs()
-    )
+    print("Audit Logs:")
+    print(AuditTrail.get_logs())
+
+    print()
+
+    print("Ledger:")
+    print(LedgerEngine.get_ledger())
+
+print("=== TEST COMPLETE ===")

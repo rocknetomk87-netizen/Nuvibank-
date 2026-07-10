@@ -1,6 +1,111 @@
-__pycache__/
-*.pyc
-*.db
-venv/
+# ==================================================
+# NUVIBANK CORE - Git Ignore Configuration
+# ==================================================
+
+# -----------------------------
+# Environment / Secrets
+# -----------------------------
 .env
-*.csv
+.env.*
+*.env
+
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# -----------------------------
+# Logs
+# -----------------------------
+*.log
+logs/
+*.log.*
+
+# -----------------------------
+# Databases / Local Storage
+# -----------------------------
+*.db
+*.sqlite
+*.sqlite3
+
+instance/
+
+# Redis dumps
+dump.rdb
+
+# -----------------------------
+# Backups
+# -----------------------------
+backups/
+*.tar.gz
+*.zip
+*.bak
+*.backup
+
+# -----------------------------
+# Tests / Coverage
+# -----------------------------
+.coverage
+htmlcov/
+.pytest_cache/
+
+# -----------------------------
+# Migrations cache
+# -----------------------------
+migrations/__pycache__/
+
+# -----------------------------
+# Node / Frontend
+# -----------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+frontend/.next/
+frontend/dist/
+frontend/build/
+
+# -----------------------------
+# IDE / Editor
+# -----------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# -----------------------------
+# OS Files
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# Temporary files
+# -----------------------------
+*.tmp
+*.temp
+*.cache
+
+# -----------------------------
+# Runtime files
+# -----------------------------
+*.pid
+*.sock
+
+# -----------------------------
+# NUVIBANK Local Files
+# -----------------------------
+resultado.log
+transfer.log
+imports.log
+estrutura.txt
+arquivos.txt
